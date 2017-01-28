@@ -10,6 +10,6 @@ before_install:
   - docker build -t sergkh/docker-etcd-registrator .
 
 script:
-  - docker tag sergkh/docker-etcd-registrator:0.1 
-  - docker tag sergkh/docker-etcd-registrator:latest     
+  - docker tag sergkh/docker-etcd-registrator sergkh/docker-etcd-registrator:0.1 
+  - docker tag sergkh/docker-etcd-registrator sergkh/docker-etcd-registrator:latest     
   - docker push sergkh/docker-etcd-registrator
