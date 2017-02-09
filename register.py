@@ -7,11 +7,11 @@
 import etcd, os, json, time, docker
 
 def update(etcdc, dockerc, base_dir):	
-	old_services = []
+	old_services = dict()
 	try:
 		services_dir = etcdc.read(base_dir, recursive=True, sorted=True)
 		for child in services_dir.children:
-			old_services.append(child.key)
+			old_services[child.key] = child.value
 	except:
 		print("No prevoius services found.")
 
@@ -28,20 +28,27 @@ def update(etcdc, dockerc, base_dir):
 		if 'Labels' in spec:
 			descr.update(spec['Labels'])
 
-		etcd_key = '{0}/{1}'.format(base_dir, service.name)
-		etcdc.write(etcd_key, json.dumps(descr))
+		containerSpec = spec['TaskTemplate']['ContainerSpec']
+		if 'Env' in containerSpec:
+			descr['Env'] = containerSpec['Env']
 
+		etcd_key = '{0}/{1}'.format(base_dir, service.name)
+		descr_json = json.dumps(descr)
+		
 		if etcd_key in old_services:
-			old_services.remove(etcd_key)
+			if not descr_json == old_services[etcd_key]:
+				print("Service {0} updated: {1}".format(service.name, descr_json))
+				etcdc.write(etcd_key, descr_json)
+			del old_services[key]
 		else:
-			print("New service added:", descr)
+			print("New service added: {0} with data: {1}".format(descr, descr_json))
 
 	for to_remove in old_services:
 		print('Unregistering service {0}'.format(to_remove))
 		try:
 			etcdc.delete(to_remove)
 		except:
-			print("Failed to unregister a service")
+			print("Failed to unregister a service {0}".format(to_remove))
 
 def main_loop():
 	etcd_host = os.environ.get('ETCD_HOST','etcd')
@@ -70,4 +77,4 @@ if __name__ == '__main__':
 		main_loop()
 	except KeyboardInterrupt:
 		print('Exiting')
-		sys.exit(0)		
+		sys.exit(0)
