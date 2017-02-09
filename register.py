@@ -4,7 +4,7 @@
 # Generates JSON for each service like:
 # { "name": "service_name", "address": "service_name:target_port", ... all serice labels ... }
 
-import etcd, os, json, time, docker
+import etcd, os, json, time, docker, sys
 
 def update(etcdc, dockerc, base_dir):	
 	old_services = dict()
@@ -13,7 +13,7 @@ def update(etcdc, dockerc, base_dir):
 		for child in services_dir.children:
 			old_services[child.key] = child.value
 	except:
-		print("No prevoius services found.")
+		print("No prevoius services found.", sys.exc_info()[0])
 
 	for service in dockerc.services.list():
 		descr = { "name": service.name }
@@ -28,9 +28,10 @@ def update(etcdc, dockerc, base_dir):
 		if 'Labels' in spec:
 			descr.update(spec['Labels'])
 
-		containerSpec = spec['TaskTemplate']['ContainerSpec']
-		if 'Env' in containerSpec:
-			descr['Env'] = containerSpec['Env']
+		if 'TaskTemplate' in spec and 'ContainerSpec' in spec['TaskTemplate']:
+			containerSpec = spec['TaskTemplate']['ContainerSpec']
+			if 'Env' in containerSpec:
+				descr['Env'] = containerSpec['Env']
 
 		etcd_key = '{0}/{1}'.format(base_dir, service.name)
 		descr_json = json.dumps(descr)
@@ -39,7 +40,7 @@ def update(etcdc, dockerc, base_dir):
 			if not descr_json == old_services[etcd_key]:
 				print("Service {0} updated: {1}".format(service.name, descr_json))
 				etcdc.write(etcd_key, descr_json)
-			del old_services[key]
+			del old_services[etcd_key]
 		else:
 			print("New service added: {0} with data: {1}".format(descr, descr_json))
 
@@ -48,7 +49,7 @@ def update(etcdc, dockerc, base_dir):
 		try:
 			etcdc.delete(to_remove)
 		except:
-			print("Failed to unregister a service {0}".format(to_remove))
+			print("Failed to unregister a service {0}, {1}".format(to_remove), sys.exc_info()[0])
 
 def main_loop():
 	etcd_host = os.environ.get('ETCD_HOST','etcd')
@@ -67,7 +68,7 @@ def main_loop():
 		try:
 			update(etcdClient, dockerClient, base_dir)
 		except:
-			print("Failed to update services")
+			print("Failed to update services: ", sys.exc_info()[0])
 
 		time.sleep(interval)
 
