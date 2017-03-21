@@ -46,7 +46,7 @@ def update(etcdc, dockerc, base_dir):
 				etcdc.set(etcd_key, descr_json)
 				print("New service added: {0} with data: {1}".format(descr, descr_json))
 			except:
-				print("Can't set value: {0} to key {1].".format(descr_json, etcd_key), sys.exc_info()[0])
+				print("Can't set value: {0} to key {1}.".format(descr_json, etcd_key), sys.exc_info()[0])
 
 	for to_remove in old_services:
 		print('Unregistering service {0}'.format(to_remove))
