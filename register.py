@@ -42,7 +42,11 @@ def update(etcdc, dockerc, base_dir):
 				etcdc.write(etcd_key, descr_json)
 			del old_services[etcd_key]
 		else:
-			print("New service added: {0} with data: {1}".format(descr, descr_json))
+			try:
+				etcdc.set(etcd_key, descr_json)
+				print("New service added: {0} with data: {1}".format(descr, descr_json))
+			except:
+				print("Can't set value: {0} to key {1].".format(descr_json, etcd_key), sys.exc_info()[0])
 
 	for to_remove in old_services:
 		print('Unregistering service {0}'.format(to_remove))
@@ -61,12 +65,12 @@ def main_loop():
 
 	print('etcd: {0}:{1}, base_dir: {2}, run_once: {3}, update_interval: {4}'.format(etcd_host, etcd_port, base_dir, not infinite_run, interval))
 
-	etcdClient = etcd.Client(host=etcd_host, port=etcd_port)
-	dockerClient = docker.DockerClient(base_url='unix://var/run/docker.sock')
+	etcd_client = etcd.Client(host=etcd_host, port=etcd_port)
+	docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 	while infinite_run:
 		try:
-			update(etcdClient, dockerClient, base_dir)
+			update(etcd_client, docker_client, base_dir)
 		except:
 			print("Failed to update services: ", sys.exc_info()[0])
 
