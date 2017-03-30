@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/sergkh/docker-etcd-registrator.svg?branch=master)](https://travis-ci.org/sergkh/docker-etcd-registrator)
 
-![Docker Hub Link](https://hub.docker.com/r/sergkh/docker-etcd-registrator/)
+[Docker Hub](https://hub.docker.com/r/sergkh/docker-etcd-registrator/)
 
 Registers all swarm services in a etcd in a format suitable for [nginx-autoproxy](https://hub.docker.com/r/sergkh/nginx-autoproxy/). Services are registered at key: `/services/:service_name`.
 
