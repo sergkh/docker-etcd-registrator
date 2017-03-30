@@ -30,9 +30,6 @@ Example:
 
 If docker service is removed it will also be removed from the `etcd`. But the actual number of containers for specific service is ignored.
 
-# Repo
-[sergkh/docker-etcd-registrator](https://github.com/sergkh/docker-etcd-registrator)
-
 Run steps:
 1. Create a swarm cluster.
 2. Start etcd service:
