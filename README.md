@@ -63,6 +63,14 @@ Configuration can be set using following environment variables:
 * `UPDATE_INTERVAL` – Docker polling interval in seconds (default: 120)
 * `RUN_ONCE` – Stops container after services update. Possible values are: `True/False` (default: `False`)
 
+# Ignoring a service
+
+Service can be ignored by simply adding a label `registry_ignore`:
+
+```
+docker service create --name kafka --label registry_ignore wurstmeister/kafka
+```
+
 # Contributions
 
 Contributions are welcomed. Thanks [@fsanaulla](https://github.com/fsanaulla) for his contributions.
