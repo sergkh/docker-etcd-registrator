@@ -4,7 +4,7 @@
 # Generates JSON for each service like:
 # { "name": "service_name", "address": "service_name:target_port", ... all service labels ... }
 
-import etcd, os, json, time, docker, sys
+import sys, os, time, json, etcd, docker
 
 def update(etcdc, dockerc, base_dir):
     old_services = dict()
@@ -18,10 +18,9 @@ def update(etcdc, dockerc, base_dir):
     for service in dockerc.services.list():
         descr = {"name": service.name}
         endpoint = service.attrs['Endpoint']
-
         spec = service.attrs['Spec']
 
-        # ignore service if ignore label is set
+        # ignore service when ignore label is set
         if 'Labels' in spec and 'registry_ignore' in spec['Labels']:
             continue
 
@@ -51,14 +50,14 @@ def update(etcdc, dockerc, base_dir):
                 etcdc.set(etcd_key, descr_json)
                 print("New service added: {0} with data: {1}".format(descr, descr_json))
             except:
-                print("Can't set value: {0} to key: {1}".format(descr_json, etcd_key), sys.exc_info()[0])
+                print("Can't set a value: {0} to a key: {1}:".format(descr_json, etcd_key), sys.exc_info()[0])
 
     for to_remove in old_services:
         print('Unregistering service {0}'.format(to_remove))
         try:
             etcdc.delete(to_remove)
         except:
-            print("Failed to unregister a service {0}".format(to_remove), sys.exc_info()[0])
+            print("Failed to unregister a service {0}:".format(to_remove), sys.exc_info()[0])
 
 def main_loop():
     etcd_host = os.environ.get('ETCD_HOST', 'etcd')
